@@ -6,7 +6,7 @@ define([
     util = require("util"),
 		mime = require('mime');
 
-	var gui = require('nw.gui'),
+	var gui = require('./js/lib/gui'),
 		clipboard = gui.Clipboard.get();
 
 	var iframe = $('#viewer iframe')[0];
@@ -84,7 +84,7 @@ define([
 
 	function base64Image(src) {
 	    var data = fs.readFileSync(src).toString("base64");
-	    return util.format("data:%s;base64,%s", mime.lookup(src), data);
+	    return util.format("data:%s;base64,%s", mime.getType(src) || "application/octet-stream", data);
 	}
 
 	function _makeImageEncode() {

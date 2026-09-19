@@ -4,7 +4,7 @@ define([
 	function(html) {
 		$('#md-help #md-help-content').append(html);
 
-		// var gui = require('nw.gui');
+		// var gui = require('./js/lib/gui');
 
 		var popWin;
 		var view, isShow = false;

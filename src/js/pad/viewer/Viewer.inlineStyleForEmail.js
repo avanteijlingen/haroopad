@@ -4,7 +4,7 @@ define([
 	var fs = require('fs'),
 		path = require('path');
 
-	var gui = require('nw.gui'),
+	var gui = require('./js/lib/gui'),
 		clipboard = gui.Clipboard.get();
 
 	var iframe = $('#viewer iframe')[0];
@@ -101,9 +101,10 @@ define([
 				name = path.basename(src);
 
 				// src = src.replace(' ', '\ ');
+				// nodemailer >= 2 attachment option names
 				attachments.push({
-					fileName: name,
-					filePath: src,
+					filename: name,
+					path: src,
 					cid: name
 				});
 

@@ -1,5 +1,5 @@
 /* globally for window event system */
-var gui = require('nw.gui');
+var gui = require('./js/lib/gui');
 
 window.nw = gui.Window.get();
 window.ee = new EventEmitter();
@@ -18,12 +18,20 @@ requirejs.config({
   paths: {
     tpl: '../../tpl',
     vendors: '../vendors',
-    txt: '../vendors/text/text'
+    txt: '../vendors/text/text',
+    /* the document model and markdown parser are shared with the controller
+       code base but run inside each pad window */
+    file: '../app/file',
+    core: '../app/core',
+    parse: '../app/core/Parser',
+    /* context menus are built and popped inside this window now */
+    context: '../app/context',
+    /* the pad answers the controller's presentation data requests */
+    tools: '../app/tools'
   },
   config: {
-    text: {
-      env: 'xhr'
-    }
+    text: { env: 'xhr' },
+    txt: { env: 'xhr' }
   }
 });
 
@@ -42,6 +50,29 @@ i18n.init({
     MenuBar();
   }
 
+  /* Every pad window owns its document model. The controller only hands over
+     a serialisable description: { fileEntry, tmp, readOnly } */
+  requirejs(['file/File.model'], function(FileModel) {
+    var info = (nw._args && nw._args.file) || {};
+
+    nw.file = new FileModel({
+      fileEntry: info.fileEntry || undefined,
+      tmp: info.tmp || undefined,
+      readOnly: !!info.readOnly
+    });
+
+    function publishState(extra) {
+      var f = nw.file;
+      nw.emit('file.state', _.extend({
+        fileEntry: f.get('fileEntry'),
+        basename: f.get('basename'),
+        dirname: f.get('dirname'),
+        tmp: !!f.get('tmp'),
+        readOnly: !!f.get('readOnly')
+      }, extra || {}));
+    }
+    nw.publishState = publishState;
+
   requirejs([
     'window/Window',
     'editor/Editor',
@@ -49,7 +80,9 @@ i18n.init({
     'ui/markdown-help/MarkdownHelp',
     'ui/file/File',
     'ui/layout/Layout',
-    'ui/footer/Footer'
+    'ui/footer/Footer',
+    'context/Pad',
+    'tools/Presentation.pad'
   ], function(Window, Editor, Viewer, /*TOC,*/ MarkdownHelp, File) {
     var _tid_;
     var file = nw.file;
@@ -69,8 +102,18 @@ i18n.init({
     nw.on('file.opened', function(file) {
       var opt, doc;
 
+      /* the controller re-uses an empty window by sending a plain description */
+      if (!file || typeof file.toJSON !== 'function') {
+        var desc = file || {};
+        file = nw.file;
+        file.set({ tmp: desc.tmp || undefined, readOnly: !!desc.readOnly }, { silent: true });
+        file.set({ fileEntry: desc.fileEntry });
+        file.load();
+      }
+
       opt = file.toJSON();
       doc = file.doc;
+      publishState({ pristine: false });
 
       Editor.off("change", delayChange);
       Editor.setValue(opt.markdown);
@@ -112,7 +155,7 @@ i18n.init({
         setTimeout(function() {
           nw.show();
           nw.focus();
-          window.parent.ee.emit('actived', nw);
+          window.parent.ee.emit('actived', nw.id);
         }, 1);
       });
     });
@@ -124,7 +167,8 @@ i18n.init({
 
       nw.show();
       nw.focus();
-      window.parent.ee.emit('actived', nw);
+      window.parent.ee.emit('actived', nw.id);
+      publishState({ pristine: true });
 
       if (nw._args.forceOpen) {
         window.ee.emit('menu.file.open');
@@ -147,7 +191,14 @@ i18n.init({
     file.on('saved', function() {
       var opt = nw.file.toJSON();
       Viewer.init();
+      delete opt.markdown;
       nw.emit('file.saved', opt);
+      publishState({ pristine: false });
+    });
+
+    /* the controller keeps track of which windows are still untouched */
+    window.ee.once('change.before.markdown', function() {
+      publishState({ pristine: false });
     });
 
     //run with file open;
@@ -167,7 +218,7 @@ i18n.init({
     nw.on('focus', function() {
       nw.file.refresh();
       nw.file.doc.trigger('change:tasks', nw.file.doc);
-      window.parent.ee.emit('actived', nw);
+      window.parent.ee.emit('actived', nw.id);
     });
 
     nw.file.doc.bind('change:tasks', function(model) {
@@ -227,6 +278,9 @@ i18n.init({
     if (window.gnMenu) {
       new gnMenu(document.getElementById('editControls'));
     }
+
+    window.__padReady = true;
+  });
   });
 
 });

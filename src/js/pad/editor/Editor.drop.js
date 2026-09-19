@@ -7,7 +7,7 @@ define([
 	var path = require('path');
 
 	function Drop(cm, e) {
-		var kind, items;
+		var kind, items, files;
 		var dataTransfer = e.dataTransfer;
 
 		e.preventDefault();
@@ -21,7 +21,7 @@ define([
 
 		kind = dataTransfer.types;
 
-		if (kind == "Files") {
+		if (Array.prototype.indexOf.call(kind, 'Files') > -1 && files && files.length) {
 			FILE(files, dropCallback);
 		} else {
 			var text = e.dataTransfer.getData('text/plain');
@@ -37,7 +37,6 @@ define([
 			}
 		}
 
-  	global._gaq.push('haroopad.editor', 'drag and drop', kind);
 	}
 
 	return Drop;

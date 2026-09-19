@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <script>require('./js/lib/gui/bootstrap.js').controller();</script>
   <meta charset="utf-8" />
   <title>Haroopad</title>
   <script>var dev = true;</script>
@@ -9,15 +10,11 @@
   <script src="js/vendors/eventEmitter/EventEmitter.js"></script>
   <script src="js/vendors/underscore/underscore.js"></script>
   <script src="js/vendors/backbone/backbone.js"></script>
-  <script src="js/vendors/backbone-pouch/dist/backbone-pouch.js"></script>
   <script src="js/vendors/haroopad-keymage/keymage.js"></script>
   <script src="js/vendors/store.js/store.js"></script>
   <script src="js/vendors/i18next/i18next.min.js"></script>
   <script src="js/vendors/requirejs/require.js"></script>
   
-  <script src="js/app/sys/system.js"></script>
-  <script src="js/app/sys/analytics.js"></script>
-  <script src="js/app/sys/i18n.js"></script>
   
   <script src="js/lib/logger.js"></script>
   <script src="js/lib/utils.js"></script>
@@ -48,7 +45,7 @@
   <!-- for develop -->
     <script>
       keymage('defmod-shift-j', function() {
-        var gui = require("nw.gui");
+        var gui = require('./js/lib/gui');
         var win = gui.Window.get();
         win.showDevTools();
       });

@@ -8,7 +8,7 @@ define([
 		var moment = require('moment');
     moment.locale(global.LOCALES._lang);
 
-		var gui = require('nw.gui'),
+		var gui = require('./js/lib/gui'),
 			win = gui.Window.get(),
 			clipboard = gui.Clipboard.get();
 
@@ -110,49 +110,42 @@ define([
 		function changeTheme(value) {
 			editor.setOption('theme', value);
 
-			global._gaq.push('haroopad.preferences', 'theme', value);
 		}
 
 		/* change font size */
 		function changeFontSize(value) {
 			setFontSize(value);
 
-			global._gaq.push('haroopad.preferences', 'fontSize', value);
 		}
 
 		/* toggle line number */
 		function toggleLineNumber(value) {
 			editor.setOption('lineNumbers', value);
 
-			global._gaq.push('haroopad.preferences', 'editor', 'lineNumbers: ' + value);
 		}
 
 		/* toggle active line */
 		function toggleActiveLine(value) {
 			editor.setOption('styleActiveLine', value);
 
-			global._gaq.push('haroopad.preferences', 'editor', 'activeLine: ' + value);
 		}
 
 		/* toggle indent with tab */
 		function toggleIndentWithTab(value) {
 			editor.setOption('indentWithTabs', value);
 
-			global._gaq.push('haroopad.preferences', 'editor', 'indent with tab: ' + value);
 		}
 
 		/* toggle vim key binding */
 		function toggleVim(value) {
 			editor.setOption('keyMap', value ? 'vim' : 'default');
 
-			global._gaq.push('haroopad.preferences', 'editor', 'vim: ' + value);
 		}
 
 		/* toggle auto pair char */
 		function toggleAutoPairChar(value) {
 			editor.setOption('autoCloseBrackets', value);
 
-			global._gaq.push('haroopad.preferences', 'editor', 'autoCloseBrackets: ' + value);
 		}
 
 		/* toggle sync scroll */
@@ -163,7 +156,6 @@ define([
 				editor.off('scroll', syncScrollHandler);
 			}
 
-			global._gaq.push('haroopad.preferences', 'editor', 'syncScroll: ' + value);
 		}
 
 		function toggleAutoComplete(value) {
@@ -186,7 +178,6 @@ define([
 				editor.setOption('extraKeys', keyMaps);
 			}
 
-			global._gaq.push('haroopad.preferences', 'editor', 'markdown folding: ' + value);
 		}
 		
 		editor.setOption('theme', config.theme);
@@ -354,11 +345,9 @@ define([
 				case 'task': 				CodeMirror.commands.markdownTask(editor); break;
 			}
 
-			global._gaq.push('haroopad.insert', 'markdown', tag);
 		});
 
 		window.ee.on('insert.toc', function() {
-			global._gaq.push('haroopad.insert', 'TOC', '');
 		});
 
 		window.ee.on('insert.date', function() {
@@ -366,14 +355,12 @@ define([
 			editor.replaceSelection(moment().format(format));
 			editor.setCursor(editor.getCursor());
 
-			global._gaq.push('haroopad.insert', 'datetime', format);
 		});
 
 		window.ee.on('insert.filename', function() {
 			editor.replaceSelection(nw.file.get('basename') || '');
 			editor.setCursor(editor.getCursor());
 
-			global._gaq.push('haroopad.insert', 'filename', '');
 		});
 
 		/* fire context menu event */

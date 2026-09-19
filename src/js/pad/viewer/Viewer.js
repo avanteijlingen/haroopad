@@ -11,7 +11,7 @@ define([
 		var iframe = $('#viewer iframe')[0];
 		var _viewer = iframe.contentWindow;
 
-		var gui = require('nw.gui'),
+		var gui = require('./js/lib/gui'),
 			clipboard = gui.Clipboard.get();
 
 		var MIN_FONT_SIZE = 9;
@@ -51,19 +51,16 @@ define([
 				StyleForEmail.generateInlineStyle();
 			}, 1000);
 
-			!log && global._gaq.push('haroopad.preferences', 'style', value);
 		}
 
 		function changeFontSize(value, log) {
 			_viewer.setFontSize(value);
 
-			!log && global._gaq.push('haroopad.preferences', 'fontSize', value);
 		}
 
 		function changeFontFamily(value, log) {
 			_viewer.setFontFamily(value);
 
-			!log && global._gaq.push('haroopad.preferences', 'fontFamily', value);
 		}
 
 		/* change syntax highlight theme */
@@ -72,7 +69,6 @@ define([
 			var style = path.join(global.PATHS.css_code, value +'.css');
 			_viewer.setCodeStyle(style);
 
-			!log && global._gaq.push('haroopad.preferences', 'code', value);
 		}
 
 		/* change clickable link */
@@ -80,7 +76,6 @@ define([
 		function changeClickableLink(value, log) {
 			viewerConfig.clickableLink = value;
 
-			!log && global._gaq.push('haroopad.preferences', 'viewer', 'changeClickableLink: ' + value);
 		}
 
 		/* change custom theme */
@@ -89,7 +84,6 @@ define([
 		// 	var css = (theme && theme.path) || '';
 		// 	_viewer.loadCustomCSS(css);
 
-		// 	!log && global._gaq.push('haroopad.preferences', 'change.custom.theme', '');
 		// }
 
 		function enableMath(value, log) {
@@ -97,7 +91,6 @@ define([
 			
 			nw.file.trigger('change:markdown');
 
-			!log && global._gaq.push('haroopad.preferences', 'enable math expression', value);
 		}
 
 		function changeMarkdownOption() {
@@ -110,7 +103,7 @@ define([
 		window.parent.ee.on('preferences.code.theme', changeCodeTheme);
 		window.parent.ee.on('preferences.viewer.clickableLink', changeClickableLink);
 		// window.parent.ee.on('preferences.custom.theme', changeCustomTheme);
-		window.parent.ee.on('preferences.markdown.change.after', changeMarkdownOption);
+		window.ee.on('preferences.markdown.change.after', changeMarkdownOption);
 		// window.parent.ee.on('preferences.general.enableMath.after', enableMath);
 		// window.parent.ee.on('preferences.markdown.mathjax.after', enableMath);
 
@@ -122,7 +115,7 @@ define([
 			window.parent.ee.off('preferences.code.theme', changeCodeTheme);
 			// window.parent.ee.off('preferences.custom.theme', changeCustomTheme);
 			window.parent.ee.off('preferences.viewer.clickableLink', changeClickableLink);
-			window.parent.ee.off('preferences.markdown.change.after', changeMarkdownOption);
+			window.ee.off('preferences.markdown.change.after', changeMarkdownOption);
 			// window.parent.ee.off('preferences.general.enableMath.after', enableMath);
 			// window.parent.ee.off('preferences.markdown.mathjax.after', enableMath);
 		});
@@ -135,7 +128,6 @@ define([
 			_viewer.replaceLazyLoading();
 			_viewer.print();
 
-			global._gaq.push('haroopad.file', 'print', '');
 		});
 
 		window.ee.on('change.column', function(count) {

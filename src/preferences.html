@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <script>require('./js/lib/gui/bootstrap.js').child();</script>
   <meta charset="utf-8" />
   <title></title>
 
@@ -25,7 +26,7 @@
 <!-- for develop -->
   <script>
     keymage('defmod-shift-j', function() {
-      var gui = require("nw.gui");
+      var gui = require('./js/lib/gui');
       var win = gui.Window.get();
       win.showDevTools();
     });
@@ -440,7 +441,6 @@
               <p>
                 <h5 data-i18n="custom.directory">Directory</h5>
                 <div class="input-group">
-                  <input class="hide" id="openCustomTheme" type="file" placeholder="Choose your directory" nwdirectory />
                   <input type="text" id="custom-theme-path" class="form-control" style="width:100%;" placeholder="Choose your directory" readonly>
                   <div class="input-group-btn">
                     <button id="custom-theme-open" class="btn btn-primary">...</button>
@@ -727,7 +727,6 @@
             </div>
 
             <div class="panel-footer">
-              <input class="hide" id="openFile" accept=".json,application/json" type="file" />
               <a class="btn btn-primary pull-right" name="export" data-i18n="backup.export">Export Settings</a>
               <a class="btn btn-default" name="import" data-i18n="backup.import">Import Settings</a>
             </div>

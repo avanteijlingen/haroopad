@@ -1,11 +1,7 @@
 var fs = require('fs'),
     path = require('path');
 
-window.gui = require('nw.gui');
-
-window.top = window;
-window.nw = gui.Window.get();
-window.ee = new EventEmitter();
+var gui = window.gui;
 
 //fixed text.js error on node-webkit
 require.nodeRequire = require;
@@ -23,9 +19,8 @@ requirejs.config({
     parse: 'core/Parser'
   },
   config: {
-    text: {
-      env: 'xhr'
-    }
+    text: { env: 'xhr' },
+    txt: { env: 'xhr' }
   }
 });
 
@@ -40,11 +35,10 @@ i18n.init({
 
   requirejs.onError = function (e) {
     console.log(e.stack)
-    alert('Oops! app is crash :-(');
+    console.error('requirejs error', e.requireModules, e.stack);
   };
 
   requirejs([
-    // 'db/DB',
     'context/Context',
     'mail/Mailer',
     'file/File',
@@ -59,10 +53,6 @@ i18n.init({
     //   options = typeof options === 'object' ? options : undefined;
       
     //   var html = Parser(md, options);
-
-    global._gaq.init(function(_gaq) {
-      _gaq && _gaq.push('haroopad', 'init', '');
-    });
 
     window.ee.on('send.email', function(fileInfo, mailInfo) {
       var child = WindowMgr.actived;
@@ -94,35 +84,9 @@ i18n.init({
       });
     })
     
-    var os = getPlatformName();
-    gui.App.on('open', function(cmdline) {
-      var file;
-
-      switch(os) {
-        case 'windows':
-          //"z:\Works\haroopad\" --original-process-start-time=1302223754723848
-          //"z:\Works\haroopad\" --original-process-start-time=1302223754723848 "z:\Works\filename.ext"
-          if (cmdline.split('"').length >= 5) {
-            cmdline = cmdline.split('"');
-            cmdline.pop();
-            
-            file = cmdline.pop();
-          }
-        break;
-        case 'mac':
-          file = cmdline;
-        break;
-        case 'linux':
-          //--enable-threaded-compositing /home/rhio/Dropbox/HarooPad/촬영-시나리오.md
-          cmdline = cmdline.split(' ');
-          cmdline.shift();
-
-
-          file = cmdline.join(' ');
-          file = file.replace(global.Manifest['chromium-args'], '').trim();
-        break;
-      }
-      WindowMgr.open(file);
+    /* files handed over by a second instance or the OS (open-with) */
+    gui.App.on('open', function(file, opts) {
+      WindowMgr.open(file, { mode: opts && opts.mode });
     });
 
     /* load temporary files */
@@ -131,7 +95,7 @@ i18n.init({
     //open file with commend line
     if (global.argv._.length > 0) {
       global.argv._.forEach(function(f) {
-        var f = path.resolve(process.env.PWD, f);
+        var f = path.resolve(f);
         var ext = path.extname(f).replace('.', '');
         ext = ext.toLowerCase();
 

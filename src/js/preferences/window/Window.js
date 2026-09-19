@@ -2,7 +2,7 @@ define([
   'window/Window.opt'
 ], function(options) {
 
-  var gui = require('nw.gui');
+  var gui = require('./js/lib/gui');
   var win = gui.Window.get();
   var zoomLevel = options.get('zoomLevel') || 0;
 

@@ -2,7 +2,7 @@ define([
 	], 
 	function() {
 
-		var marked = require('marked');
+		var marked = require('./js/vendors/marked');
 		var renderer = new marked.Renderer();
 
 		function getExt(str) {

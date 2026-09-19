@@ -32,6 +32,18 @@ define([
     },
 
     updateStyle: function(css) {
+      /* No user theme selected (or the file is gone): clear the override
+       * instead of handing undefined to the CSS parser, which threw. */
+      if (!css) {
+        this.$el.text('');
+
+        if (nw.editor) {
+          nw.editor.refresh();
+        }
+
+        return;
+      }
+
       try {
         var style = parse(css);
         this.$el.text(style || '');
@@ -40,7 +52,8 @@ define([
           nw.editor.refresh();
         }
       } catch (e) {
-        throw e;
+        /* a hand-edited theme with broken CSS must not take the editor down */
+        console.error('user editor theme could not be parsed', e);
       }
     },
 
@@ -51,6 +64,9 @@ define([
   });
 
   view = new CustomStyle;
+
+  /* exposed so the smoke test can assert theme clearing behaviour */
+  window.__customStyleView = view;
 
   window.parent.ee.on('preferences.editor.userTheme', view.changeUserTheme.bind(view));
 

@@ -4,8 +4,11 @@ define([
 
 		var temps = [];
 
-		function removeAt(idx) {
-			temps.splice(idx, 1);
+		/* several pad windows share this list through localStorage, so re-read
+		 * it before every mutation instead of trusting the in-memory copy */
+		function sync() {
+			var opt = store.get('Temporary');
+			temps = (opt && opt.files) || [];
 			return temps;
 		}
 
@@ -31,6 +34,7 @@ define([
 			},
 
 			add: function(uid) {
+				sync();
 				if (temps.indexOf(uid) === -1) {
 					temps.push(uid);
 
@@ -41,7 +45,7 @@ define([
 			},
 
 			remove: function(uid) {
-				var idx = temps.indexOf(uid);
+				var idx = sync().indexOf(uid);
 				if (idx > -1) {
 					temps.splice(idx, 1);
 					this.set({ files: temps });

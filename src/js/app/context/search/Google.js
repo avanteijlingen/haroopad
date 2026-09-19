@@ -1,7 +1,7 @@
 define([], 
 	function() {
 
-    var gui = require('nw.gui'),
+    var gui = require('./js/lib/gui'),
         win = gui.Window.get();
 
     var Google = new gui.MenuItem({

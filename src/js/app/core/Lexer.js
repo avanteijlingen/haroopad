@@ -2,7 +2,7 @@ define([
     // 'core/Renderer'
 	], 
 	function(/*Renderer*/) {
-    var marked = require("marked");
+    var marked = require('./js/vendors/marked');
     // var options = store.get('Markdown') || {};
 
     // var defaults = merge(marked.defaults, {

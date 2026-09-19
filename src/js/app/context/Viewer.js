@@ -12,7 +12,7 @@ define([
 	],
 	function(util, MenuExport, MenuPublish, MenuEmbedImage, MenuEmbedVideo, MenuEmbedAudio, MenuEmbedOthers, Themes, ThemesUser, ThemesCode) {
 
-		var gui = require('nw.gui');
+		var gui = require('./js/lib/gui');
 		var Context = new gui.Menu();
 
 		function add(item) {
@@ -28,17 +28,18 @@ define([
 
 		// add(util.sepItem());
 
+		/* the pad's Viewer listens for these on window.ee */
 		add(util.menuItem({
 			label: i18n.t('edit.copy-html'),
 			click: function() {
-				window.ee.emit('context.copy.html');
+				util.emit('menu.file.exports.clipboard.plain');
 			}
 		}));
 
 		add(util.menuItem({
 			label: i18n.t('edit.copy-styled-html'),
 			click: function() {
-				window.parent.ee.emit('menu.file.exports.clipboard.styled');
+				util.emit('menu.file.exports.clipboard.styled');
 			}
 		}));
 
@@ -56,10 +57,11 @@ define([
 
 		add(util.sepItem());
 
+		/* the presentation window is owned by the controller */
 		add(util.menuItem({
 			label: i18n.t('view.enter-presentation'),
 			click: function() {
-				window.parent.ee.emit('menu.view.presentation');
+				util.emitParent('menu.view.presentation');
 			}
 		}));
 
@@ -107,7 +109,7 @@ define([
 		add(util.menuItem({
 			label: i18n.t('file.preferences'),
 			click: function() {
-				window.ee.emit('context.preferences');
+				util.emitParent('context.preferences');
 			}
 		}));
 

@@ -1,5 +1,5 @@
 window.MenuBarHelp = function () {
-	var gui = require('nw.gui');
+	var gui = require('./js/lib/gui');
 	var shell = gui.Shell;
 	
 	var Help = new gui.Menu();

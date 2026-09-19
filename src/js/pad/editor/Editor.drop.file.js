@@ -1,6 +1,7 @@
 define([
 	], function() {
 		var path = require('path');
+		var gui = require('./js/lib/gui');
 		var dirname;
 
 		var types = {
@@ -69,7 +70,8 @@ define([
 			var type, part, name, entry, ext, size;
 
 			_.forEach(items, function(item) {
-				entry = item.path;
+				/* Chromium removed File.path */
+				entry = gui.pathForFile(item);
 				name = item.name;
 				type = item.type;
 				ext = path.extname(name);

@@ -1,6 +1,6 @@
 define([
 	], function() {
-		var gui = require('nw.gui');
+		var gui = require('./js/lib/gui');
 		var shell = gui.Shell;
 		// var manifest = gui.App.manifest;
 		var manifest = global.Manifest;

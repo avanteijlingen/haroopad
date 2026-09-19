@@ -4,7 +4,7 @@ define([
 	],
 	function() {
 		var keyMaps = {}, keyMapAutoCompletion;
-		var gui = require('nw.gui'),
+		var gui = require('./js/lib/gui'),
 			win = gui.Window.get(),
 			clipboard = gui.Clipboard.get();
 

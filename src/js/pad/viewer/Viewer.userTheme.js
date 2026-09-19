@@ -44,12 +44,26 @@ define([
     },
 
     updateStyle: function(css) {
+      /* No user theme selected (or the file is gone): write an empty
+       * stylesheet rather than handing undefined to the CSS parser, so
+       * clearing the theme actually removes the previous one. */
+      var style = '';
+
+      if (css) {
+        try {
+          style = parse(css) || '';
+        } catch (e) {
+          /* a hand-edited theme with broken CSS must not break the preview */
+          console.error('user viewer theme could not be parsed', e);
+          return;
+        }
+      }
+
       try {
-        fs.writeFileSync(path.join(baseDir, '.userStyle.css'), parse(css), 'utf8');
-        // var style = parse(css);
+        fs.writeFileSync(path.join(baseDir, '.userStyle.css'), style, 'utf8');
         this.el.setAttribute('href', userCssDir +'?'+ new Date().getTime());
-        // this.$el.text(style || '');
       } catch (e) {
+        console.error('user viewer theme could not be written', e);
       }
     },
 

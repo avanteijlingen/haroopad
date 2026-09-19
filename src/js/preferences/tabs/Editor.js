@@ -1,14 +1,13 @@
 define([
 	'tabs/Editor.opt'
 ], function(options) {
-	var readDir = require('readdir');
+	var fs = require('fs');
 	var path = require('path');
 	var config = options.toJSON();
 
 	var themes = global.THEMES.editor;
 	var themesUser = global.THEMES.user.editor;
 
-  var _gaq = global._gaq;
 
 	options.bind('change', function(model) {
 		var prop, en,
@@ -25,16 +24,24 @@ define([
 		themesUser = global.THEMES.user.editor = loadCSSFiles(global.PATHS.theme_dest_editor);
 	}
 
+	/**
+	 * Lists the `*.css` theme files in `dir` and returns their base names,
+	 * case-insensitively sorted. Replaces the abandoned `readdir` package
+	 * (`readDir.readSync(dir, ['*.css'], readDir.CASELESS_SORT)` returned the
+	 * same shape: relative file names, sorted ignoring case).
+	 */
 	function loadCSSFiles(dir) {
-		var csses = readDir.readSync(dir, ['*.css'], readDir.CASELESS_SORT);
-		var name, themes = [];
-
-		csses.forEach(function(css, idx) {
-			name = path.basename(css).replace('.css', '');
-			themes.push(name);
-		});
-
-		return themes;
+		try {
+			return fs.readdirSync(dir).filter(function(f) {
+				return /\.css$/i.test(f) && f.charAt(0) !== '.';
+			}).map(function(f) {
+				return path.basename(f).replace(/\.css$/i, '');
+			}).sort(function(a, b) {
+				return a.toLowerCase().localeCompare(b.toLowerCase());
+			});
+		} catch (e) {
+			return [];
+		}
 	}
 
 	var EditorTabView = Backbone.View.extend({
@@ -109,7 +116,6 @@ define([
 				userTheme: theme
 			});
 
-    	_gaq.push('haroopad.preferences', 'editor user theme', theme);
 		},
 
 		openUserThemeDir: function(e) {

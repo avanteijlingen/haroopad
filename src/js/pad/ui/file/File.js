@@ -12,7 +12,9 @@ define([
 		}
 
 		/* file open */
-		window.ee.on('menu.file.open', OpenDialog.show.bind(OpenDialog));
+		window.ee.on('menu.file.open', function() {
+			OpenDialog.show(getWorkingDir());
+		});
 
 		/* open dialog fire change event */
 		OpenDialog.on('file.open', function(file) {

@@ -38,10 +38,30 @@ define([
 	    html: "<b>Hello world ✔</b>" // html body*/
 	}
 
+	function closeTransport() {
+		window.clearTimeout(tid);
+
+		if (!transport) {
+			return;
+		}
+
+		try {
+			transport.close();
+		} catch (e) {
+			// nodemailer throws nothing here normally; be defensive anyway
+		}
+
+		transport = null;
+	}
+
 	function createTransport(email, password, service) {
-		// create reusable transport method (opens pool of SMTP connections)
+		// create reusable transport method (opens a pool of SMTP connections)
+		// nodemailer >= 2 still resolves well-known providers from `service`
+		closeTransport();
+
 		transport = nodemailer.createTransport({
 		    service: service || "Gmail",
+		    pool: true,
 		    auth: {
 		        user: email,
 		        pass: password
@@ -50,28 +70,30 @@ define([
 	}
 
 	function send(cb) {
+		if (!transport) {
+			cb(new Error('No mail transport configured. Call setCredential() first.'));
+			return;
+		}
 
-		// send mail with defined transport object
+		// nodemailer >= 2 returns a promise from sendMail but still honours a callback
 		transport.sendMail(mailOptions, function(error, response) {
 			cb(error, response);
 
 			if (error) {
-				transport.close();
+				closeTransport();
 				return;
 			}
 
 		    window.clearTimeout(tid);
 		    tid = window.setTimeout(function() {
-		    	transport.close(); // shut down the connection pool, no more messages
+		    	closeTransport(); // shut down the connection pool, no more messages
 		    }, 1000 * 60 * 10);
 		});
 
-		global._gaq.push('haroopad.file', 'email', '');
 	}
 
 	window.ee.on('cancel.send.email', function() {
-	    window.clearTimeout(tid);
-		transport && transport.close();
+		closeTransport();
 	});
 
 	return {
@@ -92,7 +114,6 @@ define([
 					subject = '!m '+ subject;
 				}
 				
-				global._gaq.push('haroopad.file', 'tumblr', '');
 			} else {
 				html += _glo.getEmailAdvertisementHTML();
 				text += _glo.getEmailAdvertisementMD();
@@ -109,7 +130,13 @@ define([
 			mailOptions.from = mailInfo.from;
 			mailOptions.to = to;
 			mailOptions.subject = subject;
-			mailOptions.attachments = fileInfo.attachments;
+			// nodemailer >= 2 expects { filename, path, cid } and no `attachments`
+			// key at all when there is nothing to attach
+			if (fileInfo.attachments && fileInfo.attachments.length) {
+				mailOptions.attachments = fileInfo.attachments;
+			} else {
+				delete mailOptions.attachments;
+			}
 
 			send(next);
 		}

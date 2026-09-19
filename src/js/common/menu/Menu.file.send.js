@@ -1,5 +1,5 @@
 window.MenuBarFileSend = function() {
-  var gui = require('nw.gui');
+  var gui = require('./js/lib/gui');
   var submenu = new gui.Menu();
   var shortcut;
 

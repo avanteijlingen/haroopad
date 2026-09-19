@@ -2,7 +2,7 @@ define([
 	'ui/dialog/Dialogs',
 	'ui/exports/Exports'
 ], function(Dialogs, Exports) {
-	var gui = require('nw.gui');
+	var gui = require('./js/lib/gui');
 	var win = gui.Window.get();
 	var moment = require('moment');
 
@@ -43,7 +43,9 @@ define([
 
 	win.on('close', function() {
 		if (edited) {
-			delyClose = true;
+			/* was a typo (`delyClose`) in the NW.js version, so "Save" from the
+			 * close dialog saved the file but never completed the close */
+			delayClose = true;
 			Dialogs.save.show();
 			return;
 		} else {
@@ -133,45 +135,25 @@ define([
 
 	}, false);
 
+	/**
+	 * Context menus.
+	 *
+	 * NW.js popped these from the hidden controller window at *screen*
+	 * coordinates, which needed per-platform fudge factors. Electron attaches a
+	 * popup to a window and takes coordinates relative to it, so the menus are
+	 * built and popped right here in the pad, at plain client coordinates.
+	 * `ev` is set when the event was delegated out of the viewer iframe.
+	 */
 	$('#editor').bind('contextmenu', function(e, ev) {
-		var x, y;
 		e.preventDefault();
-		e = (ev) ? ev : e;
 
-		x = e.screenX;
-		y = e.screenY;
-
-		switch (process.platform) {
-			case 'linux':
-				x = x + win.x;
-				y = y + win.y;
-			break;
-			default:
-				break;
-		}
-
-		//fixed #135
-		if (win.isFullscreen) {
-
-			switch (process.platform) {
-				case 'win32':
-					y -= 49;
-					x -= 7;
-					break;
-				case 'linux':
-					y -= 28;
-					break;
-				default:
-					y -= 40;
-					break;
+		requirejs(['context/Pad'], function(Context) {
+			if (ev) {
+				Context.popupViewer(ev);
+			} else {
+				Context.popupEditor(e);
 			}
-		}
-
-		if (ev) {
-			window.parent.ee.emit('popup.context.viewer', x, y);
-		} else {
-			window.parent.ee.emit('popup.context.editor', x, y);
-		}
+		});
 
 		return false;
 	});
@@ -196,14 +178,11 @@ define([
 	win.on('enter-fullscreen', function() {
 		document.querySelector('.CodeMirror-gutters').style.height = '3000px';
 
-		global._gaq.push('haroopad.window', 'fullscreen', 'true');
 	});
 
 	win.on('leave-fullscreen', function() {
-
-		global._gaq.push('haroopad.window', 'fullscreen', 'false');
-		// config.isFullscreen = win.isFullscreen;
-		// store.set('Window', config);
+		config.isFullscreen = false;
+		store.set('Window', config);
 	});
 
 	window.ee.on('view.fullscreen', function() {

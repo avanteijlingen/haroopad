@@ -4,7 +4,7 @@ define([
 	function(html) {
 		$('#dialogs').append(html);
 
-		// var gui = require('nw.gui');
+		// var gui = require('./js/lib/gui');
 		// var shell = gui.Shell;
 		var Emails = store.get('Emails') || {};
 		var SentList = Emails.addrs || [];

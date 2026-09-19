@@ -4,7 +4,7 @@ window.MenuBarFileRecents = function() {
     var path = require('path');
     var name, full, item, prop, res;
 
-    var gui = require('nw.gui');
+    var gui = require('./js/lib/gui');
     var submenu = new gui.Menu();
 
     var recents = store.get('Recents') || {

@@ -1,4 +1,4 @@
-var gui = require('nw.gui');
+var gui = require('./js/lib/gui');
 var path = require('path');
 
 window.nw = gui.Window.get();
@@ -27,10 +27,9 @@ i18n.init({
       vendors: '../vendors'
     },
     config: {
-      text: {
-        env: 'xhr'
-      }
-    }
+    text: { env: 'xhr' },
+    txt: { env: 'xhr' }
+  }
   });
 
   requirejs.onError = function (e) {console.log(e.stack)
@@ -80,7 +79,6 @@ i18n.init({
       nw.show();
       nw.focus();
 
-      global._gaq.push('haroopad.preferences', 'init', '');
   });
 
 });

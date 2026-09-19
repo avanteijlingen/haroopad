@@ -58,7 +58,6 @@ define([
 			nw.file.set('markdown', '## Thank you :-)\nDisabled donation auto popover!\n\nEnjoy Markdown. Enjoy Haroopad.\n');
 		}, 350);
 		
-		global._gaq.push('haroopad', 'ester egg', 'disabled donation popover');
 	});
 
 	return new Adver;

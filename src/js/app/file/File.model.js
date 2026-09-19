@@ -5,9 +5,7 @@ define([
     ], function(parse, Doc, TmpOpt) {
 
   var fs = require('fs-extra'),
-      path = require('path'),
-      base62 = require('base62');
-  var gui = require('nw.gui');
+      path = require('path');
 
   var _window = window;
   function open(fileEntry) {
@@ -15,7 +13,7 @@ define([
   }
 
   function unique() {
-    return base62.encode(parseInt(Math.random() * 100000000000000000));
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
   }
 
   function getTmpFile(uid) {

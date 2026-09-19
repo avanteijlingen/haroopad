@@ -1,24 +1,38 @@
 define(function() {
   var view;
+  var gui = require('./js/lib/gui');
 
+  function getFilters() {
+    var exts = global.mdexts || ['md', 'markdown', 'txt'];
+
+    return [
+      { name: 'Markdown', extensions: exts },
+      { name: 'All Files', extensions: ['*'] }
+    ];
+  }
+
+  /**
+   * Native open dialog. Keeps the old view's public surface:
+   * `show()` and the `file.open` event carrying a path.
+   */
   var View = Backbone.View.extend({
   	el: '#openFile',
-  	
-  	events: {
-  	  'change': 'changeHandler'
-  	},
 
   	initialize: function() {
   	},
 
-  	show: function() {
-  	  this.$el.trigger('click');
-  	},
+  	show: function(dir) {
+  	  var files = gui.dialogs.open({
+  	    dir: dir,
+  	    filters: getFilters()
+  	  });
 
-  	changeHandler: function(e) {
-  	  var file = this.$el.val();
-      this.$el.val('');
-  	  view.trigger('file.open', file);
+  	  /* cancelled */
+  	  if (!files || !files.length) {
+  	    return;
+  	  }
+
+  	  view.trigger('file.open', files[0]);
   	}
   });
 

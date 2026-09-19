@@ -2,10 +2,9 @@ define([
 		'tabs/Markdown.opt',
 		'tabs/markdown/dialog.default'
 	], function(options, dialogDefault) {
-		var gui = require('nw.gui');
+		var gui = require('./js/lib/gui');
 		var shell = gui.Shell;
 
-		var _gaq = global._gaq;
 
 		// var config = options.toJSON();
 
@@ -82,63 +81,54 @@ define([
 				var bool = $(e.target).is(':checked');
 				options.set('gfm', bool);
 				
-      	_gaq.push('haroopad.preferences', 'markdown option', 'gfm:'+bool);
 			},
 
 			enableSanitize: function(e) {
 				var bool = $(e.target).is(':checked');
 				options.set('sanitize', bool);
 
-      	_gaq.push('haroopad.preferences', 'markdown option', 'sanitize:'+bool);
 			},
 
 			enableTables: function(e) {
 				var bool = $(e.target).is(':checked');
 				options.set('tables', bool);
 
-      	_gaq.push('haroopad.preferences', 'markdown option', 'gfm tables:'+bool);
 			},
 
 			enableFootnotes: function(e) {
 				var bool = $(e.target).is(':checked');
 				options.set('footnotes', bool);
 
-      	_gaq.push('haroopad.preferences', 'markdown option', 'gfm footnotes:'+bool);
 			},
 
 			enableBreaks: function(e) {
 				var bool = $(e.target).is(':checked');
 				options.set('breaks', bool);
 
-      	_gaq.push('haroopad.preferences', 'markdown option', 'gfm line breaks:'+bool);
 			},
 
 			enableSmartLists: function(e) {
 				var bool = $(e.target).is(':checked');
 				options.set('smartLists', bool);
 
-      	_gaq.push('haroopad.preferences', 'markdown option', 'smartLists:'+bool);
 			},
 
 			enableSmartyPants: function(e) {
 				var bool = $(e.target).is(':checked');
 				options.set('smartypants', bool);
 
-      	_gaq.push('haroopad.preferences', 'markdown option', 'smartypants:'+bool);
 			},
 
 			enableMathjax: function(e) {
 				var bool = $(e.target).is(':checked');
 				options.set('mathjax', bool);
 				
-      	_gaq.push('haroopad.preferences', 'markdown option', 'mathjax:'+bool);
 			},
 
 			enableDollarSign: function(e) {
 				var bool = $(e.target).is(':checked');
 				options.set('dollarSign', bool);
 				
-      	_gaq.push('haroopad.preferences', 'markdown option', 'use single dollar sign:'+bool);
 			}
 		});
 

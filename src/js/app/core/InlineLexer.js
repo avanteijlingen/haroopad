@@ -1,7 +1,7 @@
 define([
   ], 
   function() {
-    var marked = require("marked");
+    var marked = require('./js/vendors/marked');
     // var options = store.get('Markdown') || {};
 
     // var InlineLexer = marked.InlineLexer;

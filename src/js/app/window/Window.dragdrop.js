@@ -2,7 +2,7 @@ define([
 		'window/WindowManager'
 	],
 	function(WindowMgr) {
-		var gui = require('nw.gui'),
+		var gui = require('./js/lib/gui'),
 				win = gui.Window.get();
 
 		var i = 0;

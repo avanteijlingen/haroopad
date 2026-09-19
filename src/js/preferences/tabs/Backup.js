@@ -3,9 +3,12 @@ define([
   'tabs/backup/dialog.export',
 ], function(dialogImport, dialogExport) {
   var moment = require('moment');
+  var fs = require('fs');
+  var path = require('path');
+  var os = require('os');
+  var gui = require('./js/lib/gui');
   var manifest = gui.App.manifest;
 
-  var _gaq = global._gaq;
 
   function importJson(res) {
     var view, prop;
@@ -24,33 +27,27 @@ define([
 
     events: {
       'click a[name=export]': 'exportHandler',
-      'click a[name=import]': 'importHandler',
-      'change #openFile': 'changeFileHandler'
+      'click a[name=import]': 'importHandler'
     },
 
     initialize: function() {},
 
-    changeFileHandler: function(e) {
-      var file = $('#openFile')[0].files[0];
-      // var file    = document.querySelector('#openFile').files[0];
-
-      var reader = new FileReader();
-      reader.onloadend = function(e) {
-        try {
-          var res = JSON.parse(e.target.result);
-          importJson(res);
-
-          _gaq.push('haroopad.preferences', 'backup', 'import settings');
-        } catch (e) {
-          alert('broken setting.json');
-        }
-      };
-
-      reader.readAsText(file, '');
-    },
-
+    // native open dialog replaces the old hidden `<input type=file>`
     importHandler: function() {
-      this.$('#openFile').trigger('click');
+      var files = gui.dialogs.open({
+        title: i18n.t('backup.import'),
+        filters: [{ name: 'JSON', extensions: ['json'] }]
+      });
+
+      if (!files || !files.length) return;
+
+      try {
+        var res = JSON.parse(fs.readFileSync(files[0], 'utf8'));
+        importJson(res);
+
+      } catch (e) {
+        alert('broken setting.json');
+      }
     },
 
     exportHandler: function(e) {
@@ -72,20 +69,26 @@ define([
       config._version = gui.App.manifest.version;
 
       var text = JSON.stringify(config, null, 2);
+      var name = manifest.name + '-' + moment().format('YYYY-MM-DD') + '-setting.json';
 
-      var blob = new Blob([text], {
-        type: 'application/json'
+      // native save dialog replaces the old Blob + `a.download` download
+      var file = gui.dialogs.save({
+        title: i18n.t('backup.export'),
+        defaultPath: path.join(os.homedir(), name),
+        filters: [{ name: 'JSON', extensions: ['json'] }]
       });
 
-      var a = e.currentTarget;
-      a.download = manifest.name +'-' + moment().format('YYYY-MM-DD') + '-setting.json';
-      a.href = window.URL.createObjectURL(blob);
+      if (!file) return;
 
-      // $(a).trigger('click');
+      try {
+        fs.writeFileSync(file, text, 'utf8');
+      } catch (err) {
+        alert(String(err.message || err));
+        return;
+      }
 
       // dialogExport.show();
 
-      _gaq.push('haroopad.preferences', 'backup', 'export settings');
     }
   });
 

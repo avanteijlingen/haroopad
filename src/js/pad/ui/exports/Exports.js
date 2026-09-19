@@ -7,9 +7,8 @@ define([
 			path = require('path'),
 			os = require('os'),
 			CleanCss = require('clean-css');
-		var gui = require('nw.gui');
+		var gui = require('./js/lib/gui');
 		var manifest = global.Manifest;
-		var saveEl = $("#exportHTML");
 		var cleanCss = new CleanCss();
 		var shadow = document.createElement('body');
 				shadow.style.display = 'none';
@@ -76,7 +75,8 @@ define([
 			});
 			
 			cssText += '\n footer {position:fixed; font-size:.8em; text-align:right; bottom:0px; margin-left:-25px; height:20px; width:100%;}';
-			cssText = cleanCss.minify(cssText);
+			/* clean-css >= 3 returns an object, not a string */
+			cssText = cleanCss.minify(cssText).styles;
 
 			//exception user-style theme
 			cssText = cssText.replace(new RegExp('#root', 'g'), '.markdown');
@@ -173,8 +173,7 @@ define([
 			return _glo.exportHtmlFooter();
 		}
 
-		function saveHandler(e) {
-			var file = $(e.target).val();
+		function saveHandler(file) {
 			var title = getTitle();
 
 			if (nw.file.get('dirname') == path.dirname(file)) {
@@ -189,19 +188,28 @@ define([
 			res = res.replace('@@generator', getGenerator());
 
 			save(file);
-
-			saveEl.off('change', saveHandler);
-			saveEl.val("");
 		}
 
 		window.ee.on('file.exports.html', function() {
 			var title = getTitle();
+			var file;
 
 			_clone();
 
-  		saveEl.attr('nwsaveas', title );
-  		saveEl.attr('nwworkingdir', nw.file.get('dirname') );
-			saveEl.trigger("click");
-			saveEl.on('change', saveHandler);
+			file = gui.dialogs.save({
+				dir: nw.file.get('dirname'),
+				name: title,
+				filters: [
+					{ name: 'HTML', extensions: ['html', 'htm'] },
+					{ name: 'All Files', extensions: ['*'] }
+				]
+			});
+
+			/* cancelled */
+			if (!file) {
+				return;
+			}
+
+			saveHandler(file);
 		});
 });

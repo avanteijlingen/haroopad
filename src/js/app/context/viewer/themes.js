@@ -2,7 +2,7 @@ define([
     'context/util'
     ], function(util) {
 
-    var gui = require('nw.gui');
+    var gui = require('./js/lib/gui');
     var Menu = new gui.Menu();
     var themes = global.THEMES.viewer;
 
@@ -14,7 +14,7 @@ define([
       add(util.menuItem({
         label: theme,
         click: function() {
-          window.parent.ee.emit('context.viewer.theme', this.label);
+          util.emit('viewer.theme', this.label);
         }
       }));
     });

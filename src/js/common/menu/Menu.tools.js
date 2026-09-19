@@ -1,5 +1,5 @@
 window.MenuBarTools = function () {
-	var gui = require('nw.gui'),
+	var gui = require('./js/lib/gui'),
 			win = gui.Window.get();
 
 	var Tools = new gui.Menu();	

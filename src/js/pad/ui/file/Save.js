@@ -1,36 +1,50 @@
 define(function() {
   var view;
+  var gui = require('./js/lib/gui');
 
+  function getFilters() {
+    var exts = global.mdexts || ['md', 'markdown', 'txt'];
+
+    return [
+      { name: 'Markdown', extensions: exts },
+      { name: 'All Files', extensions: ['*'] }
+    ];
+  }
+
+  /**
+   * Native save dialog. Keeps the old view's public surface:
+   * `setDefault(file)`, `show(dir, file)` and the `file.save` event.
+   */
   var View = Backbone.View.extend({
   	el: '#saveFile',
-  	
-  	events: {
-  	  'change': 'changeHandler'
-  	},
 
   	initialize: function() {
+  	  this.defaultName = null;
   	},
 
-    /* it does not work exactly */
     setDefault: function(file) {
       file = file || ( nw.file.get('title') || i18n.t('pad:untitled') ) + '.md';
 
-      this.$el.attr('nwsaveas', file);
+      this.defaultName = file;
+
+      return file;
     },
 
   	show: function(dir, file) {
-      this.$el.attr({ nwworkingdir: dir });
-      this.setDefault(file);
+      var name = this.setDefault(file);
 
-  	  this.$el.trigger('click');
-  	},
+  	  var chosen = gui.dialogs.save({
+  	    dir: dir,
+  	    name: name,
+  	    filters: getFilters()
+  	  });
 
-  	changeHandler: function(e) {
-  	  var file = this.$el.val();
-      if (!file) {
+      /* cancelled */
+      if (!chosen) {
         return;
       }
-  	  view.trigger('file.save', file);
+
+  	  view.trigger('file.save', chosen);
   	}
   });
 

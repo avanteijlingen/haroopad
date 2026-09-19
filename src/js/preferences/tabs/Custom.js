@@ -1,8 +1,9 @@
 define([
 		'tabs/Custom.opt'
 	], function(options) {
-		var readdir = require('readdir');
+		var fs = require('fs');
 		var path = require('path');
+		var gui = require('./js/lib/gui');
 
 		var config = options.toJSON() || {};
 
@@ -16,12 +17,30 @@ define([
 			}
 		});
 
+		/**
+		 * Lists the `*.css` files in `dir` keyed by theme name. Replaces the
+		 * abandoned `readdir` package: `readdir.readSync(dir, ['*.css'],
+		 * ABSOLUTE_PATHS + CASELESS_SORT)` returned absolute file paths sorted
+		 * ignoring case, which is what this reproduces.
+		 */
 		function loadCSSFiles(dir) {
-			var csses = readdir.readSync(dir, [ '*.css' ], readdir.ABSOLUTE_PATHS + readdir.CASELESS_SORT);
 			var name, themes = {};
+			var csses;
+
+			try {
+				csses = fs.readdirSync(dir).filter(function(f) {
+					return /\.css$/i.test(f) && f.charAt(0) !== '.';
+				}).sort(function(a, b) {
+					return a.toLowerCase().localeCompare(b.toLowerCase());
+				}).map(function(f) {
+					return path.join(dir, f);
+				});
+			} catch (e) {
+				csses = [];
+			}
 
 			csses.forEach(function(css, idx) {
-				name = path.basename(css).replace('.css','');
+				name = path.basename(css).replace(/\.css$/i,'');
 				themes[name] = {
 					id: idx,
 					name: name,
@@ -38,8 +57,7 @@ define([
 			events: {
 				'change select[name=customTheme]': 'changeCustomTheme',
 				'click #custom-theme-open': 'openDirWindow',
-				'click #custom-theme-reload': 'reloadThemes',
-				'change #openCustomTheme': 'changeDir'
+				'click #custom-theme-reload': 'reloadThemes'
 			},
 
 			initialize: function() {
@@ -61,7 +79,6 @@ define([
 			setPath: function(dir) {
 				this.$('#custom-theme-path').val(dir);
 				this.$('#custom-theme-path').attr('title', dir);
-				this.$('#openCustomTheme').attr('nwworkingdir', dir);
 			},
 
 			setThemeData: function(themes) {
@@ -81,12 +98,19 @@ define([
 				});
 			},
 
+			// native directory chooser replaces the old `<input nwdirectory>`
 			openDirWindow: function(e) {
-				this.$('#openCustomTheme').trigger('click');
+				var dir = gui.dialogs.directory({
+					title: i18n.t('custom.select-theme'),
+					dir: options.get('themeDir')
+				});
+
+				if (!dir) return;
+
+				this.changeDir(dir);
 			},
 
-			changeDir: function(e) {
-				var dir = $(e.target).val();
+			changeDir: function(dir) {
 				var themes;
 
 				themes = loadCSSFiles(dir);

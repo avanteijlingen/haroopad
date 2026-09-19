@@ -2,7 +2,36 @@ define([
 	'editor/Editor'
 	], function(Editor) {
 
-		var humanize = require('humanize');
+		/**
+		 * Minimal replacement for the abandoned `humanize` package.
+		 * Reproduces humanize.numberFormat(number, decimals, decPoint, thousandsSep):
+		 * rounds to `decimals` places and groups the integer part in threes.
+		 */
+		var humanize = {
+			numberFormat: function(number, decimals, decPoint, thousandsSep) {
+				decimals = isNaN(decimals) ? 2 : Math.abs(decimals);
+				decPoint = (decPoint === undefined) ? '.' : decPoint;
+				thousandsSep = (thousandsSep === undefined) ? ',' : thousandsSep;
+
+				var num = Number(number);
+				if (!isFinite(num)) {
+					num = 0;
+				}
+
+				var sign = num < 0 ? '-' : '';
+				var fixed = Math.abs(num).toFixed(decimals);
+				var parts = fixed.split('.');
+				var intPart = parts[0];
+				var fracPart = parts[1];
+
+				intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
+
+				return sign + intPart + (fracPart ? decPoint + fracPart : '');
+			}
+		};
+
+		// exposed for the smoke harness / other modules that want the same formatting
+		window.haroopadNumberFormat = humanize.numberFormat;
 
 		function _count () {
 		    var doc = nw.editor.getDoc();
@@ -56,7 +85,6 @@ define([
 		toggleMarkdownHelper: function(e) {
 			window.ee.emit('toggle.syntax.help');
 
-			global._gaq.push('haroopad', 'toggle markdown helper', '');
 		},
 
 		updateHandler: function(cm) {

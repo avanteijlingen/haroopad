@@ -3,7 +3,7 @@ define([
 	],
 	function(Google) {
 
-		var gui = require('nw.gui'),
+		var gui = require('./js/lib/gui'),
 	        win = gui.Window.get();
 		var Search = new gui.Menu();
 

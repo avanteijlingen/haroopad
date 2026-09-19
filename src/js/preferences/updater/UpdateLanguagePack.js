@@ -1,49 +1,20 @@
-define([
-  'txt!tpl/modal-update-languages.html'
-  ], function(html) {
-    $('#dialogs').append(html);
-
-    var manifest = global.Manifest,
-      info = manifest.app.info || {},
-      language = info.language || {},
-      locales = language.locales || [];
-
-    var fs = require('fs-extra');
-    var download = require('download-github-repo');
-    var pkgObj = fs.readJsonSync(global.PATHS.locales +'/package.json', 'utf8');
-
-    function update() {
-      download(language.path, global.PATHS.locales, function(err) {
-        if (err) {
-          $('#update-languages-dialog .modal-body strong').html(i18n.t('system.language.update.error'));
-          return;
-        }
-
-        $('#update-languages-dialog .modal-body strong').html(i18n.t('system.language.update.done'));
-        $('#update-languages-dialog button[name=yes]').html(i18n.t('done'));
-
-        setTimeout(function() {
-          $('#update-languages-dialog').modal('hide');
-        }, 2500);
-      });
-    }
-    
-    if (language.version && compareVersions(language.version, pkgObj.version)) {
-      if (locales[0] == 'all' || locales.indexOf(window.navigator.language.toLowerCase().split('-')[0]) > -1) {
-        $('#update-languages-dialog').modal('show');
-      }
-    }
-
-    $('#update-languages-dialog button[name=yes]').click(function() {
-      $(this).button('loading');
-      $('#update-languages-dialog button[name=no]').attr('disabled', 'disabled');
-      update();
-    });
-
-    $('#update-languages-dialog button[name=no]').click(function(e) {
-      $('#update-languages-dialog').modal('hide');
-    });
-
-    $('#update-languages-dialog button[name=yes]').attr({ 'data-loading-text': i18n.t('updating') });
-
+/**
+ * Language-pack updater — intentionally a no-op.
+ *
+ * Haroopad used to download the `haroopad-locales` repository at runtime with the
+ * abandoned `download-github-repo` package, driven by an update feed on
+ * `pad.haroopress.com`. That endpoint is dead and the package is unmaintained, so
+ * there is no backing service for the feature any more.
+ *
+ * Locales are now BUNDLED with the application (`global.PATHS.locales`,
+ * `src/locales`) and ship with each release, which is what the download used to
+ * provide. The module is kept so the requirejs dependency list in
+ * `js/preferences/index.js` still resolves; it never shows its dialog.
+ */
+define([], function() {
+  return {
+    /** kept for API compatibility with the old updater; does nothing */
+    check: function() {},
+    update: function() {}
+  };
 });

@@ -1,5 +1,5 @@
 window.MenuBar = function() {
-	var gui = require('nw.gui'),
+	var gui = require('./js/lib/gui'),
 		win = gui.Window.get();
 
 	var menu = MenuBar._systemMenu;

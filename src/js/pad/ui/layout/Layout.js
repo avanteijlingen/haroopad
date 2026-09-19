@@ -1,7 +1,7 @@
 define([
 	],
 	function() {
-		var gui = require('nw.gui');
+		var gui = require('./js/lib/gui');
 		var win = gui.Window.get();
 
 		var $pad = $('#main');
@@ -87,7 +87,6 @@ define([
 
 			nw.editor && nw.editor.refresh();
 
-  		global._gaq.push('haroopad.view', 'mode', layout);
 		}
 
 		function right5() {

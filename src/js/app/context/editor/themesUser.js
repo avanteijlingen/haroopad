@@ -2,7 +2,7 @@ define([
     'context/util'
     ], function(util) {
 
-    var gui = require('nw.gui');
+    var gui = require('./js/lib/gui');
     var Menu = new gui.Menu();
 
     function add(item) {
@@ -21,7 +21,7 @@ define([
         add(util.menuItem({
           label: theme,
           click: function() {
-            window.parent.ee.emit('context.editor.theme.user', this.label);
+            util.emit('editor.theme.user', this.label);
           }
         }));
       });
@@ -29,9 +29,14 @@ define([
 
     gen(global.THEMES.user.editor);
 
-    window.ee.on('preferences.editor.userTheme', function(theme) {
+    /* preferences broadcasts arrive on the parent (controller) bus in a
+       child window, and on the local bus in the controller itself */
+    function refresh() {
       removeAll();
       gen(global.THEMES.user.editor);
-    });
+    }
+
+    util.onPreferences('preferences.editor.userTheme', refresh);
+
     return Menu;
 });

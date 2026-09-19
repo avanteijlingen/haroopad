@@ -7,45 +7,47 @@ define([
 	],
 	function(util, Search, Themes, ThemesUser) {
 
-		var gui = require('nw.gui');
+		var gui = require('./js/lib/gui');
 		var Context = new gui.Menu();
 
 		function add(item) {
 			Context.append(item);
 		}
 
+		/* clipboard commands: handled by the pad's own editor
+		   (src/js/pad/editor/Editor.js listens on window.ee) */
 		add(util.menuItem({
 			label: i18n.t('edit.cut'),
 			click: function() {
-				window.ee.emit('context.cut');
+				util.emit('context.cut');
 			}
 		}));
 
 		add(util.menuItem({
 			label: i18n.t('edit.copy'),
 			click: function() {
-				window.ee.emit('context.copy');
+				util.emit('context.copy');
 			}
 		}));
 
 		add(util.menuItem({
 			label: i18n.t('edit.paste'),
 			click: function() {
-				window.ee.emit('context.paste');
+				util.emit('context.paste');
 			}
 		}));
 
 		add(util.menuItem({
 			label: i18n.t('edit.delete'),
 			click: function() {
-				window.ee.emit('context.delete');
+				util.emit('context.delete');
 			}
 		}));
 
 		add(util.menuItem({
 			label: i18n.t('edit.select-all'),
 			click: function() {
-				window.ee.emit('context.selectall');
+				util.emit('context.selectall');
 			}
 		}));
 
@@ -78,10 +80,11 @@ define([
 		
 		add(util.sepItem());
 
+		/* the preferences window belongs to the controller */
 		add(util.menuItem({
 			label: i18n.t('file.preferences'),
 			click: function() {
-				window.ee.emit('context.preferences');
+				util.emitParent('context.preferences');
 			}
 		}));
 
