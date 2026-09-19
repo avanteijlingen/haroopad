@@ -1,6 +1,10 @@
 # Manual test checklist
 
 `./scripts/smoke.sh` covers the automated path (see the list at the bottom).
+On Windows run `build.bat smoke` instead; the packaged app has no console there,
+so set `HAROOPAD_SMOKE_OUT=<file>` to read the report. Clear `ELECTRON_RUN_AS_NODE`
+before any smoke run: with it set the app starts as plain Node and exits 0, which
+looks exactly like a pass. `build.bat` and `smoke.sh` both clear it for you.
 Everything below needs a human, mostly because it opens a native modal dialog
 or depends on real input devices or network services.
 

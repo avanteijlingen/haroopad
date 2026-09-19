@@ -63,6 +63,14 @@ define([
 		close();
 	});
 
+	Dialogs.save.bind('cancel', function() {
+		/* The user backed out of closing (Cancel, Escape, or a click outside
+		 * the dialog). This latch used to stay set for the life of the window,
+		 * so the next successful save -- Ctrl+S minutes later, with no dialog
+		 * in sight -- ran close() and the window vanished as if it had crashed. */
+		delayClose = false;
+	});
+
 	var reloadFile;
 	Dialogs.reload.bind('reload', function() {
 		window.ee.emit('reload');
@@ -116,6 +124,11 @@ define([
 	window.ee.on('change.before.markdown', function(markdown, html, editor) {
 		win.title = orgTitle + ' ('+ i18n.t('pad:modified') +')';
 		edited = true;
+
+		/* Editing again means any close we were part way through is stale. The
+		 * dialog's own cancel clears the latch; this also covers a save that
+		 * threw (a read-only path, a full disk) and so never reported back. */
+		delayClose = false;
 	});
 
 	window.addEventListener('keydown', function(e) {

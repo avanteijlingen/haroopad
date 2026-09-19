@@ -12,6 +12,19 @@ const path = require('path');
 const errors = [];
 const TIMEOUT = Number(process.env.HAROOPAD_SMOKE_TIMEOUT || 90000);
 
+/* Windows GUI executables have no console attached, so stdout goes nowhere and
+ * only the exit code survives. HAROOPAD_SMOKE_OUT=<file> mirrors the report
+ * into a file, which makes the run readable on every platform. */
+const OUT = process.env.HAROOPAD_SMOKE_OUT;
+
+function say(text) {
+  console.log(text);
+
+  if (OUT) {
+    try { fs.appendFileSync(OUT, text + os.EOL); } catch (e) { /* best effort */ }
+  }
+}
+
 function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
 async function until(fn, ms, what) {
@@ -229,15 +242,15 @@ function run(ctx) {
     });
     if (failures.length) report.failedAssertions = failures;
     const failed = errors.length > 0 || failures.length > 0;
-    console.log('SMOKE_REPORT ' + JSON.stringify(report, null, 2));
-    console.log(failed ? 'SMOKE_FAIL' : 'SMOKE_PASS');
+    say('SMOKE_REPORT ' + JSON.stringify(report, null, 2));
+    say(failed ? 'SMOKE_FAIL' : 'SMOKE_PASS');
     BrowserWindow.getAllWindows().forEach(function (w) { w.__forceClose = true; });
     app.exit(failed ? 1 : 0);
   })();
 
   setTimeout(function () {
-    console.log('SMOKE_REPORT ' + JSON.stringify({ timeout: true, errors: errors.slice(0, 30) }, null, 2));
-    console.log('SMOKE_FAIL');
+    say('SMOKE_REPORT ' + JSON.stringify({ timeout: true, errors: errors.slice(0, 30) }, null, 2));
+    say('SMOKE_FAIL');
     app.exit(3);
   }, TIMEOUT);
 }

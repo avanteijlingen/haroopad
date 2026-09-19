@@ -124,7 +124,7 @@ Phase 3 - packaging  **DONE**
 - [x] `.github/workflows/build.yml` builds Linux and Windows and runs the smoke test under xvfb
 - [x] Windows `.exe` built locally after all, via `npm run dist:win:docker` (electronuserland/builder:wine); produces the NSIS installer and the portable exe, both verified as PE32+ x86-64 binaries
 - [ ] pacman target dropped: electron-builder's bundled fpm needs `libcrypt.so.1`, which current Arch does not ship (`libxcrypt-compat` would fix it)
-- [ ] The Windows build has not been *run* anywhere; that needs a Windows machine (see `TESTING.md`)
+- [x] Built natively on Windows 11 (Node 26, electron-builder 26.15.3) with `npm run dist:win`: NSIS installer + portable exe. The packaged app and the installed copy both pass the smoke test (exit 0; the report text itself is invisible on Windows because GUI-subsystem binaries have no console). Installed per-user to `%LOCALAPPDATA%\Programs\Haroopad`
 
 ## 3b. Bugs found and fixed along the way
 
@@ -144,6 +144,9 @@ now covered by an assertion in the smoke test.
 | 59 unguarded `WindowMgr.actived.window.ee.emit(...)` | a menu accelerator with no document open threw | `app/window/Window.js` |
 | Email attachment keys were nodemailer 0.x names | inline images would never embed | `pad/viewer/Viewer.inlineStyleForEmail.js` |
 | Emoji images were missing entirely | every `:smile:` rendered as a broken image | vendored into `src/img/emoji` |
+| Cancelling the "save before closing?" dialog left the pending-close latch set | the **next** successful save closed the window with no warning, looking like a crash | `pad/window/Window.js`, `pad/ui/dialog/Save.js` |
+| The donate popover opened itself on a timer | a box appeared over the footer on first run and again every few hours | `pad/ui/footer/_Advertise.js` |
+| `ELECTRON_RUN_AS_NODE` in the environment made the packaged app start as plain Node | the smoke test exited 0 without running, so **every run looked like a pass** | `build.bat`, `scripts/smoke.sh` already cleared it |
 
 ## 4. Out of scope for this pass (follow-ups)
 - Replacing vendored jQuery/Backbone/underscore/CodeMirror 4 with npm versions (pure JS, works as is)

@@ -1,18 +1,5 @@
 define([
 	],function() {
-	// var shell = gui.Shell;
-	
-	var _cookie = store.get('_time') || { donate : 0 };
-
-	function loop() {
-		var now = new Date().getTime();
-
-		if (_cookie.donate < now) {
-			$('#donate-btn>button').popover('show');
-			_cookie.donate = now + Math.random() * 1000 * 60 * 60 * 8;
-			store.set('_time', _cookie);
-		}
-	}
 
 	var Adver = Backbone.View.extend({
 		el: '#donate-btn',
@@ -22,12 +9,15 @@ define([
 		},
 
 		initialize: function() {
+			/* The popover opens only when the button is clicked; the markup
+			 * carries data-trigger="click" and Bootstrap handles the toggle.
+			 * It used to additionally pop itself open on a 10s timer (at once
+			 * on a fresh profile, then every few hours), which it no longer
+			 * does -- the box stays shut until the user asks for it. */
 			this.$('button[data-toggle=popover]').popover({
 				content: i18n.t('pad:donate.desc'),
 				title: i18n.t('pad:donate.title')
 			});
-
-			window.setInterval(loop, 10000);
 		},
 
 		hide: function() {
@@ -35,29 +25,14 @@ define([
 		},
 
 		donateHandler: function(e) {
-			var d;
 			e.preventDefault();
 
-			if (e.target.id == 'donate-link') {
-				d = new Date().getTime() + Math.random() * 1000 * 60 * 60 * 24 * 10;
-
-				if (_cookie.donate < d) {
-					store.set('_time', _cookie);
-				}
-
+			/* The link inside the popover closes it. preventDefault above also
+			 * stops the href from navigating the pad window away from pad.html. */
+			if (e.target.id === 'donate-link') {
 				this.$('button[data-toggle=popover]').popover('hide');
-			} 
+			}
 		}
-	});
-
-	keymage('i space n e e d space h a r o o p a d space f o r e v e r', function(e) {
-		_cookie.donate = new Date().getTime() + 1000 * 60 * 60 * 24 * 99999;
-		store.set('_time', _cookie);
-
-		setTimeout(function() {
-			nw.file.set('markdown', '## Thank you :-)\nDisabled donation auto popover!\n\nEnjoy Markdown. Enjoy Haroopad.\n');
-		}, 350);
-		
 	});
 
 	return new Adver;

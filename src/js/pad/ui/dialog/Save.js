@@ -17,9 +17,23 @@ define([
 
 			initialize: function() {
 				this.$el.i18n();
+
+				/* Every button carries data-dismiss="modal", and Escape or a
+				 * click on the backdrop closes the dialog too. Anything that
+				 * closes it without the user picking Save or Don't Save is a
+				 * cancel, and the window needs to hear about that so it can
+				 * drop the close it was holding. */
+				this.$el.on('hidden.bs.modal', function() {
+					if (this._choice) {
+						return;
+					}
+
+					this.trigger('cancel');
+				}.bind(this));
 			},
 
 			show: function() {
+				this._choice = null;
 				this.$el.modal('show');
 				this.$('._save').focus();
 			},
@@ -49,15 +63,18 @@ define([
 			},
 
 			saveHandler: function() {
+				this._choice = 'save';
 				this.trigger('save');
 				this.hide();
 			},
 
 			cancelHandler: function() {
+				/* no _choice, so hiding reports a cancel */
 				this.hide();
 			},
-			
+
 			dontSaveHandler: function() {
+				this._choice = 'dont-save';
 				this.trigger('dont-save');
 				this.hide();
 			}
