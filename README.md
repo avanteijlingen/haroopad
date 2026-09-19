@@ -126,6 +126,93 @@ Haroopad gives you the same editing experience regardless of the platform you ar
   - Task: `- [ ]`
   - Task (Done): `- [x]`
 
+### Building from source
+
+Haroopad runs on [Electron](https://www.electronjs.org/). The old NW.js / Grunt /
+bower toolchain has been removed; everything is driven by npm scripts.
+
+**Prerequisites**
+
+* [Node.js](https://nodejs.org/) 18 or newer (20 LTS recommended)
+* npm 9 or newer (ships with Node)
+
+No native compilation is required, so there is no need for `nw-gyp`, `gconf`,
+Python or a C++ toolchain.
+
+**Install**
+
+```sh
+npm install
+```
+
+**Run**
+
+```sh
+npm start
+```
+
+**Automated check**
+
+```sh
+npm run smoke
+```
+
+The smoke run launches the app headlessly, opens a pad window, types markdown,
+verifies the live preview (highlight.js, tasklists, MathJax), saves a file, opens
+the Preferences window and checks that a changed setting reaches the pad. It
+prints a `SMOKE_REPORT` and exits non-zero if any renderer error was logged.
+
+**Packaging**
+
+The quickest route is the build script at the repo root, which builds both
+platforms and picks Wine or Docker automatically for the Windows target:
+
+```sh
+./build.sh            # Linux + Windows
+./build.sh linux      # Linux only
+./build.sh win        # Windows only
+./build.sh clean      # wipe dist/ first, then build everything
+```
+
+The underlying npm scripts are also available directly:
+
+```sh
+npm run dist:linux        # AppImage + tar.gz
+npm run dist:win          # Windows installer + portable .exe (needs Wine)
+npm run dist:win:docker   # the same, in a container that already has Wine
+npm run dist              # both platforms
+```
+
+Packaging uses [electron-builder](https://www.electron.build/) and writes to
+`dist/`:
+
+| file | what it is |
+|---|---|
+| `Haroopad-<version>.AppImage` | portable Linux build, `chmod +x` and run |
+| `haroopad-<version>.tar.gz` | the same build as a plain archive |
+| `Haroopad Setup <version>.exe` | Windows installer (NSIS, per-user) |
+| `Haroopad <version>.exe` | Windows portable executable |
+
+Building the Windows target on Linux needs Wine. If you would rather not
+install it, `npm run dist:win:docker` runs the build inside
+`electronuserland/builder:wine`; it only needs Docker. The GitHub Actions
+workflow in `.github/workflows/build.yml` builds both platforms on every push
+and uploads the artifacts.
+
+Two notes for Linux packagers:
+
+* The `pacman` target is not enabled. electron-builder's bundled `fpm` needs
+  `libcrypt.so.1`, which current Arch no longer ships; install
+  `libxcrypt-compat` if you want to add it back.
+* `./scripts/smoke.sh` accepts the same environment variables as `npm run
+  smoke` and additionally prints the report after killing the app, which is
+  handy in CI.
+
+**Manual testing**
+
+`TESTING.md` lists the things the automated smoke run cannot cover, such as the
+native file dialogs, drag and drop, printing and sending email.
+
 ### TODO
 
 * Plugin System

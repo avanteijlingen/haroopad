@@ -1,0 +1,60 @@
+name: Build
+
+on:
+  push:
+    branches: [ develop, main ]
+    tags: [ 'v*' ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # The smoke test drives a real Electron window, so it needs a display.
+      - name: Smoke test
+        run: xvfb-run --auto-servernum node_modules/electron/dist/electron . --no-sandbox
+        env:
+          HAROOPAD_SMOKE: 1
+          HAROOPAD_SMOKE_TIMEOUT: 120000
+
+      - name: Package
+        run: npx electron-builder --linux --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: haroopad-linux
+          path: |
+            dist/*.AppImage
+            dist/*.tar.gz
+            dist/*.pacman
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Package
+        run: npx electron-builder --win --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: haroopad-windows
+          path: |
+            dist/*.exe

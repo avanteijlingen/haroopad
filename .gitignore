@@ -4,7 +4,15 @@
 *.iml
 .idea
 
-build
+# dependencies are installed with `npm install`
+node_modules/
+src/node_modules/
+
+# packaged output and build caches
+dist/
+.cache/
+
+# legacy NW.js runtimes and build artifacts
 haroopad.app
 assets
 lib/node-webkit.app/Contents/Libraries/

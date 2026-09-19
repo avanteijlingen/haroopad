@@ -1,28 +1,136 @@
 {
   "name": "haroopad",
-  "version": "0.13.3",
+  "productName": "Haroopad",
+  "version": "0.14.0",
   "description": "The Next Document processor based on Markdown",
-  "main": "",
-  "homepage": "https://rhiokim.github.com/haroopad",
+  "main": "src/main/main.js",
+  "homepage": "https://github.com/rhiokim/haroopad",
   "repository": "git://github.com/rhiokim/haroopad.git",
-  "author": "rhio.kim@gmail.com",
-  "license": "GPLv3",
-  "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-asciify": "^0.2.2",
-    "grunt-contrib-clean": "^1.0.0",
-    "grunt-contrib-compress": "^1.0.0",
-    "grunt-contrib-concat": "^1.0.0",
-    "grunt-contrib-copy": "^0.8.2",
-    "grunt-contrib-cssmin": "^0.14.0",
-    "grunt-contrib-htmlmin": "^0.6.0",
-    "grunt-contrib-jshint": "~0.8.0",
-    "grunt-contrib-requirejs": "~0.4.0",
-    "grunt-contrib-uglify": "^0.11.1",
-    "grunt-replace": "~0.5.1",
-    "grunt-shell": "^1.1.2",
-    "grunt-timer": "~0.2.1",
-    "time-grunt": "^1.3.0"
+  "author": {
+    "name": "Rhio Kim",
+    "email": "rhio.kim@gmail.com"
   },
-  "dependencies": {}
+  "license": "GPL-3.0",
+  "scripts": {
+    "start": "electron .",
+    "smoke": "HAROOPAD_SMOKE=1 electron .",
+    "dist:linux": "electron-builder --linux",
+    "dist:win": "electron-builder --win",
+    "dist": "electron-builder --linux --win",
+    "dist:win:docker": "mkdir -p .cache/dockerhome && docker run --rm -v \"$PWD\":/project -w /project -e HOME=/project/.cache/dockerhome -e XDG_CACHE_HOME=/project/.cache -e ELECTRON_CACHE=/project/.cache/electron -e ELECTRON_BUILDER_CACHE=/project/.cache/electron-builder --user $(id -u):$(id -g) electronuserland/builder:wine /bin/bash -c \"npx electron-builder --win --publish never\""
+  },
+  "app": {
+    "upgrade": "https://api.github.com/repos/rhiokim/haroopad/releases/latest"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.1.3",
+    "clean-css": "^5.3.3",
+    "css": "^3.0.0",
+    "fs-extra": "^11.3.0",
+    "highlight.js": "^11.11.1",
+    "mime": "^3.0.0",
+    "minimist": "^1.2.8",
+    "moment": "^2.30.1",
+    "nodemailer": "^7.0.0"
+  },
+  "devDependencies": {
+    "electron": "^44.4.3",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.haroopress.haroopad",
+    "productName": "Haroopad",
+    "copyright": "Copyright (C) Rhio Kim, GPL-3.0",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "!src/**/{test,tests,spec,docs,demo,examples,unpacked}/**",
+      "!src/**/*.map",
+      "!src/**/.git*",
+      "!src/**/{Gruntfile.js,gulpfile.js,bower.json,.bowerrc,component.json}",
+      "!src/**/{CHANGELOG,CONTRIBUTING,AUTHORS,HISTORY}*",
+      "!src/js/vendors/**/{src,test,tests}/**",
+      "!src/node_modules/**"
+    ],
+    "extraMetadata": {
+      "main": "src/main/main.js"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "tar.gz",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Office;TextEditor;Development",
+      "icon": "build/icon.png",
+      "synopsis": "Markdown enabled document processor",
+      "description": "Haroopad is a markdown enabled document processor for creating web-friendly documents.",
+      "desktop": {
+        "entry": {
+          "Name": "Haroopad",
+          "Comment": "The Next Document processor based on Markdown",
+          "MimeType": "text/markdown;text/x-markdown;text/plain;",
+          "Keywords": "markdown;editor;text;"
+        }
+      },
+      "maintainer": "Rhio Kim <rhio.kim@gmail.com>",
+      "executableName": "haroopad"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Haroopad"
+    },
+    "fileAssociations": [
+      {
+        "ext": [
+          "md",
+          "markdown",
+          "mdown",
+          "mkd",
+          "mkdn",
+          "mdwn",
+          "mmd",
+          "mdtxt",
+          "mdtext"
+        ],
+        "name": "Markdown Document",
+        "description": "Markdown Document",
+        "role": "Editor"
+      }
+    ]
+  }
 }
