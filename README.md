@@ -1,3 +1,10 @@
+# Haroopad-fork
+
+I just like Haroopad but its not been updated in over 10 years.
+
+So i set LLM's on the task to make it into what I want from it.
+
+
 # Haroopad
 
 **Haroopad** is a markdown enabled document processor for creating web-friendly documents.
@@ -186,12 +193,12 @@ npm run dist              # both platforms
 Packaging uses [electron-builder](https://www.electron.build/) and writes to
 `dist/`:
 
-| file | what it is |
-|---|---|
-| `Haroopad-<version>.AppImage` | portable Linux build, `chmod +x` and run |
-| `haroopad-<version>.tar.gz` | the same build as a plain archive |
-| `Haroopad Setup <version>.exe` | Windows installer (NSIS, per-user) |
-| `Haroopad <version>.exe` | Windows portable executable |
+| file                           | what it is                               |
+| ------------------------------ | ---------------------------------------- |
+| `Haroopad-<version>.AppImage`  | portable Linux build, `chmod +x` and run |
+| `haroopad-<version>.tar.gz`    | the same build as a plain archive        |
+| `Haroopad Setup <version>.exe` | Windows installer (NSIS, per-user)       |
+| `Haroopad <version>.exe`       | Windows portable executable              |
 
 Building the Windows target on Linux needs Wine. If you would rather not
 install it, `npm run dist:win:docker` runs the build inside
