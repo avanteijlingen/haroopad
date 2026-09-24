@@ -80,7 +80,7 @@ function run(ctx) {
       await wait(600);
 
       // block math is its own paragraph ($$..$$); inline math is $$$..$$$
-      const md = '# Smoke Title\n\nHello **world** $$$a+b$$$\n\n$$\nx^2\n$$\n\n- [ ] task\n\n```js\nvar a = 1;\n```\n';
+      const md = '# Smoke Title\n\nHello **world** $$$a+b$$$\n\n$$\nx^2\n$$\n\n- [ ] task\n\n```js\nvar a = 1;\n```\n\n```mermaid\nflowchart TD\n  A-->B\n  B-->C\n```\n';
       await pad.webContents.executeJavaScript('window.nw.editor.setValue(' + JSON.stringify(md) + '); true');
 
       const html = await until(function () {
@@ -106,6 +106,13 @@ function run(ctx) {
       report.taskList = await until(function () {
         return viewerHas('!!b.querySelector("input.task-list-item")');
       }, 15000, 'task list checkboxes').catch(function () { return false; });
+      /* A drawn diagram, not merely an <svg> element: mermaid 6 left an empty
+       * one behind for every diagram type it did not understand. */
+      report.mermaidRendered = await until(function () {
+        return viewerHas('(function(){var s=b.querySelector("code.mermaid svg, div.mermaid svg");'
+          + 'return !!s && s.querySelectorAll("rect, path, circle, polygon").length > 2})()');
+      }, 20000, 'mermaid diagram').catch(function () { return false; });
+
       report.mathRendered = await until(function () {
         return pad.webContents.executeJavaScript(
           '(function(){var f=document.querySelector("#viewer iframe");var b=f&&f.contentDocument&&f.contentDocument.getElementById("root");return !!(b&&b.querySelector(".MathJax, .MathJax_Display, .mjx-chtml, mjx-container"))})()');

@@ -4,8 +4,6 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <script>var dev = true; try { delete window.module; delete window.exports; } catch (e) {}</script>
   <link rel="stylesheet" href="js/vendors/haroopad-oembed/jquery.oembed.css">
-  <link rel="stylesheet" href="js/vendors/mermaid/dist/mermaid.css">
-  <!-- <link rel="stylesheet" href="js/vendors/mermaid/dist/mermaid.forest.css"> -->
   <link rel="stylesheet" href="css/viewer.css">
   <link rel="stylesheet" href="css/markdown/markdown.css">
   <link rel="stylesheet" id="column">
@@ -18,7 +16,9 @@
   <script src="js/vendors/haroopad-echo/src/echo.js"></script>
   <script src="js/vendors/haroopad-oembed/jquery.oembed.js"></script>
   <script>window.hljs = require('highlight.js');</script>
-  <script src="js/vendors/mermaid/dist/mermaid.js"></script>
+  <!-- mermaid ships an IIFE bundle that assigns globalThis.mermaid; it carries
+       its own styles, so no stylesheet goes with it -->
+  <script src="../node_modules/mermaid/dist/mermaid.min.js"></script>
   
   <script src="js/lib/disable.debug.js"></script>
 	<script src="js/viewer/main.js"></script>

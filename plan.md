@@ -146,9 +146,12 @@ now covered by an assertion in the smoke test.
 | Emoji images were missing entirely | every `:smile:` rendered as a broken image | vendored into `src/img/emoji` |
 | Cancelling the "save before closing?" dialog left the pending-close latch set | the **next** successful save closed the window with no warning, looking like a crash | `pad/window/Window.js`, `pad/ui/dialog/Save.js` |
 | The donate popover opened itself on a timer | a box appeared over the footer on first run and again every few hours | `pad/ui/footer/_Advertise.js` |
+| A packaging glob (`!src/js/vendors/**/{src,test,tests}/**`) dropped the whole `haroopad-echo` library, whose files all live under `src/` | `Echo.init()` threw inside the viewer's update path, and everything after it stopped: **no mermaid diagram ever drew in a packaged build**, task indexes were never assigned and the `rendered` event that refreshes the table of contents never fired. Dev builds were fine, which is why it went unnoticed | `package.json` files list, `scripts/check-packaged-assets.js` |
+| The viewer's render ran its steps unguarded | one failing step silently discarded the rest of the render | `viewer/main.js` (`optional()`) |
+| mermaid was the 2015 build (6.0.0) | only `graph`, `sequenceDiagram`, `classDiagram` and `gantt` drew; `flowchart`, `stateDiagram-v2`, `erDiagram`, `journey`, `pie`, `gitGraph` and `mindmap` produced an empty `<svg>` with no error | upgraded to mermaid 12 from npm |
 | `ELECTRON_RUN_AS_NODE` in the environment made the packaged app start as plain Node | the smoke test exited 0 without running, so **every run looked like a pass** | `build.bat`, `scripts/smoke.sh` already cleared it |
 
 ## 4. Out of scope for this pass (follow-ups)
 - Replacing vendored jQuery/Backbone/underscore/CodeMirror 4 with npm versions (pure JS, works as is)
-- Newer mermaid / MathJax 3 (rendering behaviour changes)
+- MathJax 3 (rendering behaviour changes). Mermaid **is** now current (12.x from npm, loaded as its IIFE bundle; `mermaid.run()` replaces the removed `init()`, and `initialize()` replaces `sequenceConfig`/`ganttConfig`)
 - macOS packaging (electron-builder supports it; not tested here)

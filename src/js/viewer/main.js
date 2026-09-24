@@ -546,21 +546,71 @@ function update(wrapper) {
 
   // countFragments(_md_body);
   drawMathJax();
-  drawEmbedContents(document.body);
 
-  Echo.init({
-    offset: 10,
-    throttle: 250
+  /* Everything below used to run unguarded, so one failing step took the rest
+   * of the render with it. That is how a packaging rule that dropped the echo
+   * library silently stopped mermaid from drawing, stopped task indexes being
+   * assigned and stopped the "rendered" event that refreshes the table of
+   * contents -- with nothing in the console to say so. Each optional step is
+   * now contained, and reports itself instead of failing quietly. */
+  optional('embedded content', function () {
+    drawEmbedContents(document.body);
   });
 
-  try {
-    mermaid.init();
-  } catch (e) {}
+  optional('lazy image loading', function () {
+    Echo.init({
+      offset: 10,
+      throttle: 250
+    });
+  });
+
+  optional('mermaid', renderMermaid);
 
   indexingTasklist();
 
   window.ee.emit('rendered', _md_body);
 }
+/**
+ * Run one optional step of the render. A step that throws is reported and
+ * skipped; it must not stop the steps after it.
+ */
+function optional(what, fn) {
+  try {
+    fn();
+  } catch (e) {
+    console.error('viewer: ' + what + ' failed: ' + (e && e.message || e));
+  }
+}
+
+/**
+ * Draw every mermaid block that has not been drawn yet.
+ *
+ * The document is re-rendered from scratch on each change, so the blocks are
+ * new elements each time and none of them carry data-processed. run() is
+ * asynchronous in mermaid 12 and rejects on a bad diagram; suppressErrors
+ * leaves mermaid's own error graphic in place of the block instead of
+ * throwing away the rest of the document.
+ */
+function renderMermaid() {
+  if (typeof mermaid === 'undefined' || !_md_body) {
+    return;
+  }
+
+  var nodes = _md_body.querySelectorAll('code.mermaid:not([data-processed]), div.mermaid:not([data-processed])');
+
+  if (!nodes.length) {
+    return;
+  }
+
+  try {
+    var done = mermaid.run({ nodes: nodes, suppressErrors: true });
+
+    if (done && typeof done.catch === 'function') {
+      done.catch(function () { /* a broken diagram must not break the page */ });
+    }
+  } catch (e) { /* ditto */ }
+}
+
 /**
  * sync scroll position
  * @param  {[type]} per [description]
@@ -607,59 +657,39 @@ $(document.body).ready(function() {
   });
 
   codeLanguages = hljs.listLanguages();
-  mermaid.sequenceConfig = {
-    diagramMarginX: 50,
-    diagramMarginY: 10,
-    boxTextMargin: 5,
-    noteMargin: 10,
-    messageMargin: 35,
-    mirrorActors: true,
-    width: 150,
-    // Height of actor boxes
-    height: 30
-  };
-  mermaid.ganttConfig = {
-    titleTopMargin: 25,
-    barHeight: 20,
-    barGap: 4,
-    topPadding: 50,
-    sidePadding: 100,
-    gridLineStartPadding: 35,
-    fontSize: 11,
-    numberSectionStyles: 4,
-    axisFormatter: [
-      // Within a day
-      ["%I:%M",
-        function(d) {
-          return d.getHours();
-        }
-      ],
-      // Monday a week
-      ["w. %U",
-        function(d) {
-          return d.getDay() == 1;
-        }
-      ],
-      // Day within a week (not monday)
-      ["%a %d",
-        function(d) {
-          return d.getDay() && d.getDate() != 1;
-        }
-      ],
-      // within a month
-      ["%b %d",
-        function(d) {
-          return d.getDate() != 1;
-        }
-      ],
-      // Month
-      ["%m-%y",
-        function(d) {
-          return d.getMonth();
-        }
-      ]
-    ]
-  };
+
+  /* mermaid 12: configuration goes through initialize(), and rendering is the
+   * async run() below. The 2015 build took `mermaid.sequenceConfig` /
+   * `mermaid.ganttConfig` and a synchronous init(); those are gone, which is
+   * why only the four diagram types it happened to support still drew.
+   * The gantt axisFormatter array is gone too -- v12 takes a d3 format string. */
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      sequence: {
+        diagramMarginX: 50,
+        diagramMarginY: 10,
+        boxTextMargin: 5,
+        noteMargin: 10,
+        messageMargin: 35,
+        mirrorActors: true,
+        width: 150,
+        // Height of actor boxes
+        height: 30
+      },
+      gantt: {
+        titleTopMargin: 25,
+        barHeight: 20,
+        barGap: 4,
+        topPadding: 50,
+        leftPadding: 100,
+        gridLineStartPadding: 35,
+        fontSize: 11,
+        numberSectionStyles: 4
+      }
+    });
+  }
+
   // _body.addEventListener("DOMNodeInserted", function (ev) {
   // console.log(ev.target.tagName);
   // }, false);

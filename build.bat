@@ -104,6 +104,18 @@ goto :eof
 echo.
 echo ==^> Building Windows targets ^(NSIS installer, portable^)
 call npx electron-builder --win --publish never
+if errorlevel 1 (
+  echo.
+  echo     If this says "Can't open output file", a running Haroopad is holding
+  echo     dist\Haroopad ^<version^>.exe open. Close it and build again.
+  exit /b 1
+)
+
+rem A page can reference a file that the packaging globs quietly dropped; the
+rem app still starts, so only the missing feature gives it away.
+echo.
+echo ==^> Checking every referenced file survived packaging
+call node scripts\check-packaged-assets.js
 if errorlevel 1 exit /b 1
 goto :eof
 

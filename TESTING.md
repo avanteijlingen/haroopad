@@ -72,4 +72,9 @@ Run the app with `npm start`.
 `padOpened`, `editorReady`, `viewerRendered`, `codeHighlighted`, `taskList`,
 `mathRendered`, `saved`, `titleUpdated`, `preferencesOpened`, `preferenceApplied`,
 `emptyUserThemeSafe`, `menuBuilt`, `secondPadOpened`, `activeWindowTracked`,
-`independentDocuments`, `closeTracked`, plus "no renderer errors in any window".
+`independentDocuments`, `closeTracked`, `mermaidRendered`, plus "no renderer errors in any window".
+
+`node scripts/check-packaged-assets.js` is a separate check, run by `build.bat`
+after each build: it fails if any file an HTML page loads was dropped from the
+asar by the packaging globs. That failure mode is invisible at startup and cost
+a long hunt once already.
